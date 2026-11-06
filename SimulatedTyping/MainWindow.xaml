@@ -1,0 +1,117 @@
+<Window x:Class="SimulatedTyping.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="模拟手打输入" Width="900" Height="730" MinWidth="760" MinHeight="600"
+        WindowStartupLocation="CenterScreen" Background="#F5F7FB"
+        Closing="Window_Closing" StateChanged="Window_StateChanged">
+    <Window.Resources>
+        <Style TargetType="TextBlock"><Setter Property="FontFamily" Value="Microsoft YaHei UI"/><Setter Property="Foreground" Value="#1C2A40"/></Style>
+        <Style TargetType="Button"><Setter Property="FontFamily" Value="Microsoft YaHei UI"/><Setter Property="Padding" Value="16,8"/><Setter Property="Margin" Value="0,0,10,0"/></Style>
+        <Style TargetType="TextBox"><Setter Property="FontFamily" Value="Microsoft YaHei UI"/><Setter Property="FontSize" Value="14"/></Style>
+    </Window.Resources>
+    <Grid Margin="25">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="模拟手打输入" FontSize="27" FontWeight="Bold"/>
+            <TextBlock Text="先选中要输入的文字，按 Ctrl+F7 读取；再点选输入位置，按 Ctrl+F8 开始。" Foreground="#637187" Margin="0,6,0,0"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,12">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,9">
+                            <TextBlock Text="输入内容" FontSize="17" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="CountText" Text="0 字" DockPanel.Dock="Right" HorizontalAlignment="Right" Foreground="#637187"/>
+                        </DockPanel>
+                        <TextBox x:Name="SourceText" Height="150" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Padding="9" TextChanged="SourceText_TextChanged"/>
+                        <TextBlock x:Name="PlanText" Foreground="#637187" TextWrapping="Wrap" Margin="0,9,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="打字速度" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="FixedMode" Content="固定速度" IsChecked="True" Checked="SpeedMode_Changed" Margin="0,0,18,0"/>
+                            <RadioButton x:Name="RangeMode" Content="范围内随机变化" Checked="SpeedMode_Changed"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,13,0,0">
+                            <TextBlock Text="固定" VerticalAlignment="Center" Margin="0,0,8,0"/><TextBox x:Name="FixedSpeed" Text="60" Width="65" Padding="5"/>
+                            <TextBlock Text="最低" VerticalAlignment="Center" Margin="22,0,8,0"/><TextBox x:Name="MinSpeed" Text="45" Width="65" Padding="5" IsEnabled="False"/>
+                            <TextBlock Text="最高" VerticalAlignment="Center" Margin="22,0,8,0"/><TextBox x:Name="MaxSpeed" Text="75" Width="65" Padding="5" IsEnabled="False"/>
+                            <TextBlock Text="字/分钟" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="指最终中文字数；删改与句末停顿会增加实际耗时。" Foreground="#637187" Margin="0,9,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="句末与段末停顿" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="句末概率" Width="78" VerticalAlignment="Center"/>
+                            <Slider x:Name="SentencePauseRate" Width="210" Minimum="0" Maximum="100" Value="35" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SavePauseRate_ValueChanged"/>
+                            <TextBlock x:Name="SentencePauseRateText" Text="35%" Width="50" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBlock Text="段末概率" Width="78" VerticalAlignment="Center"/>
+                            <Slider x:Name="ParagraphPauseRate" Width="210" Minimum="0" Maximum="100" Value="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="SavePauseRate_ValueChanged"/>
+                            <TextBlock x:Name="ParagraphPauseRateText" Text="100%" Width="50" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <TextBlock Text="参考等待" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox x:Name="SaveWaitSeconds" Text="10" Width="65" Padding="5"/>
+                            <TextBlock Text="秒 + 1 秒安全余量；每次触发时停顿。" VerticalAlignment="Center" Margin="9,0,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="Google 文档没有公开固定的自动保存间隔；停顿可留出保存时间，但不能保证形成独立的历史版本。" Foreground="#637187" TextWrapping="Wrap" Margin="0,9,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="删改与输入方式" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,11"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="删改率" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Slider x:Name="ErrorRate" Width="210" Minimum="0" Maximum="30" Value="8" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="ErrorRate_ValueChanged"/>
+                            <TextBlock x:Name="ErrorRateText" Text="8%" Width="45" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <TextBlock Text="约每 100 个词组的修正次数" Foreground="#637187" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                            <TextBlock Text="输入方式" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox x:Name="InputMode" Width="235" SelectedIndex="0">
+                                <ComboBoxItem Content="系统拼音预览（准确上屏）"/><ComboBoxItem Content="准确按字（不显示拼音候选）"/>
+                            </ComboBox>
+                            <TextBlock Text="换行" VerticalAlignment="Center" Margin="22,0,8,0"/>
+                            <ComboBox x:Name="NewlineMode" Width="145" SelectedIndex="0">
+                                <ComboBoxItem Content="Shift+Enter"/><ComboBoxItem Content="Enter"/><ComboBoxItem Content="跳过换行"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <TextBlock Text="系统拼音模式会展示拼音组合，再按原文上屏，避免候选排序造成错字。同音误选会先上屏错字，停顿后退格重打。" TextWrapping="Wrap" Foreground="#637187" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E9F1FF" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="操作提示" FontWeight="SemiBold"/>
+                        <TextBlock Text="在任意程序中选中要输入的文字，按 Ctrl+F7 自动读取并就绪；再点选实际输入位置，按 Ctrl+F8 开始／暂停／继续；Ctrl+F9 停止。也可手动粘贴内容后点“就绪并隐藏”。系统拼音模式请先把输入法切到中文。" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="本窗口试打" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,9"/>
+                        <TextBox x:Name="PreviewText" Height="85" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Padding="9"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="2" Background="White" CornerRadius="10" Padding="13" Margin="0,10,0,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="试打预览" Click="PreviewButton_Click"/>
+                    <Button Content="就绪并隐藏" Click="ArmButton_Click" Background="#2962FF" BorderBrush="#2962FF" Foreground="White"/>
+                    <Button Content="停止" Click="StopButton_Click" Margin="0"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center" Margin="4,0,12,0">
+                    <TextBlock x:Name="StatusText" Text="待就绪" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="ProgressText" Text="0 / 0 字" Foreground="#637187" FontSize="12" Margin="0,2,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
