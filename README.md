@@ -2,6 +2,10 @@
 
 Windows x64 桌面应用。粘贴文本后，可以按固定字速或设定速度范围，模拟中文拼音打字、短暂停顿与可见的退格修正。
 
+## 下载程序
+
+[下载 Windows x64 单文件版 SimulatedTyping.exe](https://github.com/b0ringzl/SimulatedTyping/releases/latest/download/SimulatedTyping.exe)
+
 ## 使用
 
 1. 运行 `SimulatedTyping.exe`，在窗口中设置速度、删改率、输入方式、停顿等参数。
